@@ -1,8 +1,74 @@
 import React, { useState } from "react";
 import "./style.css";
 
+function detectarCaracteres(texto) {
+  // Define grupos de caracteres suspeitos
+  const chars = {
+    tracos: ["—", "–", "―"],
+    espacosEspeciais: [" ", " ", " ", " ", " ", "\u00A0"],
+    invisiveis: ["\u200B", "\u200C", "\u200D", "\u2060"],
+    aspas: ["“", "”", "‘", "’", "‹", "›", "«", "»"],
+    hifensEspeciais: ["‐", "‑", "‒", "−"],
+    controlesDirecionais: ["\u200E", "\u200F", "\u202A", "\u202B", "\u202C", "\u202D", "\u202E"],
+    invisiveisFuncionais: ["\u2061", "\u2062", "\u2063", "\u2064"],
+    especiais: ["⠀", "ㅤ"]
+  };
+
+  // Função de contagem
+  const countChars = (text, charsArr) =>
+    text.split("").filter(c => charsArr.includes(c)).length;
+
+  return {
+    tracos: countChars(texto, chars.tracos),
+    espacosEspeciais: countChars(texto, chars.espacosEspeciais),
+    invisiveis: countChars(texto, chars.invisiveis),
+    aspas: countChars(texto, chars.aspas),
+    hifensEspeciais: countChars(texto, chars.hifensEspeciais),
+    controlesDirecionais: countChars(texto, chars.controlesDirecionais),
+    invisiveisFuncionais: countChars(texto, chars.invisiveisFuncionais),
+    especiais: countChars(texto, chars.especiais)
+  };
+}
+
+function destacarCaracteres(texto) {
+  const mapa = {
+    "—": "vermelho", "–": "vermelho", "―": "vermelho",
+    " ": "azul", " ": "azul", " ": "azul", " ": "azul", " ": "azul", "\u00A0": "azul",
+    "\u200B": "amarelo", "\u200C": "amarelo", "\u200D": "amarelo", "\u2060": "amarelo",
+    "“": "roxo", "”": "roxo", "‘": "roxo", "’": "roxo", "‹": "roxo", "›": "roxo", "«": "roxo", "»": "roxo",
+    "‐": "rosa", "‑": "rosa", "‒": "rosa", "−": "rosa",
+    "\u200E": "verde", "\u200F": "verde", "\u202A": "verde", "\u202B": "verde", "\u202C": "verde", "\u202D": "verde", "\u202E": "verde",
+    "\u2061": "verde-claro", "\u2062": "verde-claro", "\u2063": "verde-claro", "\u2064": "verde-claro",
+    "⠀": "amarelo-claro", "ㅤ": "amarelo-claro"
+  };
+
+  return texto.split("").map((c, i) =>
+    mapa[c] ?
+      <span key={i} className={`char-destaque ${mapa[c]}`} title={c.codePointAt(0).toString(16)}>
+        {c}
+      </span>
+      : c
+  );
+}
+
 export default function App() {
   const [textoOriginal, setTextoOriginal] = useState("");
+  const [mensagem, setMensagem] = useState("");
+
+  // Análise em tempo real
+  const analise = detectarCaracteres(textoOriginal);
+  const totalCaracteres = textoOriginal.length;
+
+  // Limpa, copia e mostra mensagem
+  function handleLimpar() {
+    if (textoOriginal) {
+      navigator.clipboard.writeText(textoOriginal).then(() => {
+        setMensagem("Texto copiado!");
+        setTimeout(() => setMensagem(""), 2000);
+      });
+    }
+    setTextoOriginal("");
+  }
 
   return (
     <div className="container">
@@ -61,8 +127,10 @@ export default function App() {
             <span role="img" aria-label="Lupa">🔎</span>
             <span>Análise dos Caracteres</span>
           </div>
-          <div className="analise-area">
-            O texto analisado aparecerá aqui com os caracteres suspeitos destacados...
+          <div className="analise-area" style={{minHeight: 70, wordBreak: "break-all"}}>
+            {textoOriginal
+              ? destacarCaracteres(textoOriginal)
+              : "O texto analisado aparecerá aqui com os caracteres suspeitos destacados..."}
           </div>
         </div>
       </main>
@@ -72,17 +140,18 @@ export default function App() {
           <span role="img" aria-label="Gráfico">📊</span> Estatísticas do Texto
         </div>
         <div className="estatisticas-grid">
-          <div className="estat-box"><div className="valor">0</div> Total de Caracteres</div>
-          <div className="estat-box"><div className="valor">0</div> Travessões</div>
-          <div className="estat-box"><div className="valor">0</div> Espaços Especiais</div>
-          <div className="estat-box"><div className="valor">0</div> Caracteres Invisíveis</div>
-          <div className="estat-box"><div className="valor">0</div> Aspas Tipográficas</div>
-          <div className="estat-box"><div className="valor">0</div> Controles Direcionais</div>
-          <div className="estat-box"><div className="valor">0</div> Invisíveis Funcionais</div>
-          <div className="estat-box"><div className="valor">0</div> Caracteres Especiais</div>
-          <div className="estat-box"><div className="valor">0</div> Hífens Especiais</div>
+          <div className="estat-box"><div className="valor">{totalCaracteres}</div> Total de Caracteres</div>
+          <div className="estat-box"><div className="valor">{analise.tracos}</div> Travessões</div>
+          <div className="estat-box"><div className="valor">{analise.espacosEspeciais}</div> Espaços Especiais</div>
+          <div className="estat-box"><div className="valor">{analise.invisiveis}</div> Caracteres Invisíveis</div>
+          <div className="estat-box"><div className="valor">{analise.aspas}</div> Aspas Tipográficas</div>
+          <div className="estat-box"><div className="valor">{analise.controlesDirecionais}</div> Controles Direcionais</div>
+          <div className="estat-box"><div className="valor">{analise.invisiveisFuncionais}</div> Invisíveis Funcionais</div>
+          <div className="estat-box"><div className="valor">{analise.especiais}</div> Caracteres Especiais</div>
+          <div className="estat-box"><div className="valor">{analise.hifensEspeciais}</div> Hífens Especiais</div>
         </div>
-        <button className="btn-limpar">✨ Limpar Caracteres</button>
+        <button className="btn-limpar" onClick={handleLimpar}>✨ Limpar Caracteres</button>
+        <div style={{marginTop:8, color:"green"}}>{mensagem}</div>
       </section>
     </div>
   );
