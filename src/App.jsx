@@ -247,3 +247,30 @@ export default function App() {
                 padding: 10,
                 borderRadius: 6,
                 border: "1px solid #ccc",
+                fontSize: 15,
+                background: "#f9f9f9"
+              }}
+              onFocus={e => e.target.select()}
+            />
+            {avisocopiado && (
+              <div style={{ color: "#28a745", fontWeight: 500, marginTop: 4 }}>
+                Texto limpo copiado para a área de transferência!
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+      <footer
+        style={{
+          marginTop: 40,
+          textAlign: "center",
+          color: "#aaa",
+          fontSize: 14
+        }}
+      >
+        Detector IA Text Cleaner | Desenvolvido para você
+      </footer>
+    </div>
+  );
+}
+
