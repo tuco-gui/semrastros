@@ -1,17 +1,22 @@
 import React, { useState } from "react";
 import "./style.css";
 
-function detectarCaracteres(texto) {
-  const chars = {
-    tracos: ["—", "–", "―"],
-    espacosEspeciais: [" ", " ", " ", " ", " ", "\u00A0"],
-    invisiveis: ["\u200B", "\u200C", "\u200D", "\u2060"],
-    aspas: ["“", "”", "‘", "’", "‹", "›", "«", "»"],
-    hifensEspeciais: ["‐", "‑", "‒", "−"],
-    controlesDirecionais: ["\u200E", "\u200F", "\u202A", "\u202B", "\u202C", "\u202D", "\u202E"],
-    invisiveisFuncionais: ["\u2061", "\u2062", "\u2063", "\u2064"],
-    especiais: ["⠀", "ㅤ"]
-  };
+function destacarCaracteres(texto) {
+  // Cada caracter, se for especial, recebe <span className="char-destaque cor" style={{fontWeight:700}}>{c}</span>
+  return texto.split("").map((c, i) =>
+    mapa[c]
+      ? (
+        <span
+          key={i}
+          className={`char-destaque ${mapa[c]}`}
+          style={{ fontWeight: 700, padding: "2px 4px", borderRadius: "6px", background: "#fff", margin: "0 1px" }}
+          title={c.codePointAt(0).toString(16)}
+        >
+          {c}
+        </span>
+      )
+      : c
+  );
 
   const countChars = (text, charsArr) =>
     text.split("").filter(c => charsArr.includes(c)).length;
