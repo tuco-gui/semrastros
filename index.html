@@ -4,41 +4,207 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LIMPA RASTROS DE IA</title>
-    <!-- Fonte Poppins (títulos) -->
+    <!-- Fontes -->
     <link href="https://fonts.googleapis.com/css?family=Poppins:700,800,900&display=swap" rel="stylesheet" />
-    <!-- Fonte Lato (texto geral) -->
     <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
-    <!-- Montserrat secundária (opcional, caso queira usar para institucional) -->
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
     <style>
+      :root {
+        --vermelho-figueira: #E31937;
+        --preto: #000000;
+        --branco: #FFFFFF;
+        --areia: #f7f4ed;
+        --cinza-escuro: #2C2C2C;
+      }
       html, body {
         height: 100%;
         margin: 0;
         padding: 0;
-      }
-      body {
-        background: #f7f4ed;
-        min-height: 100vh;
+        background: var(--areia);
         font-family: 'Lato', Arial, sans-serif;
         -webkit-font-smoothing: antialiased;
       }
       #root {
         min-height: 100vh;
       }
-      /* Remove scroll azul em textarea no Mac */
-      textarea:focus-visible {
-        outline: 2px solid #E31937 !important;
+      body {
+        min-height: 100vh;
+        background: var(--areia);
       }
-      /* Scroll bonito nas análises */
-      ::-webkit-scrollbar {
-        width: 8px;
-        background: #ececec;
+      /* Paleta para garantir o fundo */
+      .bg-main { background: var(--areia); }
+      /* Scroll bonito */
+      ::-webkit-scrollbar { width: 8px; background: #ececec;}
+      ::-webkit-scrollbar-thumb { background: #e2e2e2; border-radius: 5px;}
+      /* Corrige fontes */
+      h1, h2, h3, h4, .headline, .titulo-topo {
+        font-family: 'Poppins', Arial, sans-serif !important;
+        color: var(--vermelho-figueira);
+        font-weight: 800;
       }
-      ::-webkit-scrollbar-thumb {
-        background: #e2e2e2;
-        border-radius: 5px;
+      .titulo-topo {
+        font-size: 2.4rem;
+        letter-spacing: 0.02em;
+        margin: 16px 0 8px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .titulo-topo .material-icons {
+        font-size: 2.3rem;
+        margin-right: 8px;
+        color: var(--vermelho-figueira);
+        vertical-align: bottom;
+      }
+      .subheadline {
+        color: var(--cinza-escuro);
+        font-family: 'Lato', Arial, sans-serif;
+        text-align: center;
+        font-size: 1.10rem;
+        font-weight: 400;
+        margin-bottom: 20px;
+      }
+      /* Caixas principais */
+      .container-app {
+        max-width: 1220px;
+        margin: 28px auto 0 auto;
+        background: none;
+        padding: 0 0 28px 0;
+      }
+      .tipos-caracteres {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 18px 28px;
+        background: #fff;
+        border-radius: 18px;
+        padding: 18px 28px 10px 28px;
+        font-size: 1rem;
+        margin-bottom: 22px;
+        border: 1px solid #eee;
+      }
+      .tipo-item {
+        display: flex;
+        align-items: center;
+        font-family: 'Lato', Arial, sans-serif;
+        font-size: 1rem;
+        margin-bottom: 6px;
+      }
+      .tipo-dot {
+        width: 14px; height: 14px; border-radius: 3px; margin-right: 7px; display: inline-block;
+      }
+      .tipo-1 { background: #E31937; }
+      .tipo-2 { background: #1a82e2; }
+      .tipo-3 { background: #f9a602; }
+      .tipo-4 { background: #e67e22; }
+      .tipo-5 { background: #ad3de7; }
+      .tipo-6 { background: #444; }
+      .box-2col {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 22px;
+      }
+      .caixa-principal {
+        flex: 1 1 0;
+        background: #fff;
+        border-radius: 18px;
+        border: 1px solid #e0e0e0;
+        min-width: 0;
+        min-height: 270px;
+        display: flex;
+        flex-direction: column;
+        padding: 18px 16px 14px 20px;
+        box-sizing: border-box;
+      }
+      .caixa-principal + .caixa-principal { margin-left: 0; }
+      .caixa-titulo {
+        display: flex;
+        align-items: center;
+        font-family: 'Poppins', Arial, sans-serif;
+        font-size: 1.36rem;
+        font-weight: 700;
+        color: var(--cinza-escuro);
+        margin-bottom: 8px;
+      }
+      .caixa-titulo .material-icons {
+        color: var(--cinza-escuro);
+        font-size: 1.5rem;
+        margin-right: 7px;
+      }
+      .caixa-textoarea {
+        flex: 1;
+        background: #fafbfb;
+        border-radius: 12px;
+        border: 1.5px solid #e2e2e2;
+        margin-bottom: 0;
+        margin-top: 4px;
+        padding: 18px 14px;
+        font-size: 1.6rem;
+        resize: none;
+        font-family: 'Fira Mono', 'Menlo', 'Consolas', monospace;
+        color: var(--cinza-escuro);
+        width: 100%;
+        min-height: 170px;
+        box-sizing: border-box;
+        outline: none;
+      }
+      .caixa-analise {
+        flex: 1;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1.5px solid #e2e2e2;
+        margin-bottom: 0;
+        margin-top: 4px;
+        padding: 18px 16px;
+        font-size: 1.25rem;
+        font-family: 'Lato', Arial, sans-serif;
+        color: #7c7c7c;
+        width: 100%;
+        min-height: 170px;
+        box-sizing: border-box;
+      }
+      /* Estatísticas */
+      .estatisticas-box {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background: #e7eaf4;
+        border-radius: 16px;
+        padding: 18px 0 10px 0;
+        gap: 18px;
+        margin: 0 0 12px 0;
+      }
+      .estat-item {
+        flex: 1 1 0;
+        background: #fff;
+        border-radius: 10px;
+        min-width: 90px;
+        min-height: 65px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Montserrat', 'Lato', Arial, sans-serif;
+        font-weight: 700;
+        margin: 0 8px;
+        border: 1.5px solid #d4dbe4;
+        font-size: 1.18rem;
+        color: var(--cinza-escuro);
+      }
+      .estat-num {
+        font-size: 2.02rem;
+        font-weight: 800;
+        color: var(--vermelho-figueira);
+        font-family: 'Poppins', Arial, sans-serif;
+        margin-bottom: 2px;
+      }
+      /* Responsivo */
+      @media (max-width: 900px) {
+        .container-app { max-width: 99vw; }
+        .box-2col { flex-direction: column; gap: 18px;}
+        .estatisticas-box { flex-direction: column; gap: 7px;}
+        .estat-item { margin: 0 0 7px 0; }
       }
     </style>
   </head>
