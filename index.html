@@ -1,18 +1,48 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LIMPA RASTROS DE IA</title>
-    <!-- Google Fonts: Poppins, Lato, Montserrat -->
-    <link href="https://fonts.googleapis.com/css?family=Poppins:700,600,400&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Lato:400,300,700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,600&display=swap" rel="stylesheet">
+    <!-- Fonte Poppins (títulos) -->
+    <link href="https://fonts.googleapis.com/css?family=Poppins:700,800,900&display=swap" rel="stylesheet" />
+    <!-- Fonte Lato (texto geral) -->
+    <link href="https://fonts.googleapis.com/css?family=Lato:400,700,900&display=swap" rel="stylesheet" />
     <!-- Material Icons -->
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <!-- Montserrat secundária (opcional, caso queira usar para institucional) -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700&display=swap" rel="stylesheet" />
+    <style>
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background: #f7f4ed;
+        min-height: 100vh;
+        font-family: 'Lato', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      #root {
+        min-height: 100vh;
+      }
+      /* Remove scroll azul em textarea no Mac */
+      textarea:focus-visible {
+        outline: 2px solid #E31937 !important;
+      }
+      /* Scroll bonito nas análises */
+      ::-webkit-scrollbar {
+        width: 8px;
+        background: #ececec;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #e2e2e2;
+        border-radius: 5px;
+      }
+    </style>
   </head>
-  <body style="background:#f7f4ed;">
+  <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
