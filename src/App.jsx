@@ -1,449 +1,169 @@
 import React, { useState } from "react";
+import "./styles.css";
 
-// Tipos de marcas/caracteres IA
-const tiposMarcas = [
-  {
-    nome: "Travessões (Em Dash, En Dash, Three-Em Dash)",
-    cor: "#E57373",
-    regex: /[\u2013\u2014\u2015]/g,
-    label: "Travessão",
-    exemplo: "—"
-  },
-  {
-    nome: "Espaços Especiais (Em Space, En Space, NBSP, etc.)",
-    cor: "#42A5F5",
-    regex: /[\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u00A0]/g,
-    label: "Esp. Especial",
-    exemplo: " "
-  },
-  {
-    nome: "Espaços Invisíveis (ZWSP, ZWNJ, ZWJ, etc.)",
-    cor: "#FFA726",
-    regex: /[\u200B\u200C\u200D]/g,
-    label: "Esp. Invisível",
-    exemplo: "‎"
-  },
-  {
-    nome: "Aspas Tipográficas (Left/Right Single/Double Quotes)",
-    cor: "#AB47BC",
-    regex: /[\u2018\u2019\u201A\u201B\u201C\u201D\u201E\u201F]/g,
-    label: "Aspa Tipográfica",
-    exemplo: "“"
-  },
-  {
-    nome: "Controles Direcionais (LRM, RLM, RLO)",
-    cor: "#26A69A",
-    regex: /[\u200E\u200F\u202A-\u202E]/g,
-    label: "Controle Dir.",
-    exemplo: "‎"
-  },
-  {
-    nome: "Caracteres Invisíveis (Function App, Invisible Times, etc.)",
-    cor: "#66BB6A",
-    regex: /[\u2060\uFEFF]/g,
-    label: "Inv. Funcional",
-    exemplo: "⁠"
-  },
-  {
-    nome: "Caracteres Especiais (Braille Blank, Hangul Filler)",
-    cor: "#BDB76B",
-    regex: /[\u2800\u3164]/g,
-    label: "Esp. Especial",
-    exemplo: "⠀"
-  },
-  {
-    nome: "Hífens Especiais (Soft Hyphen, Non-Breaking Hyphen, Minus)",
-    cor: "#EC407A",
-    regex: /[\u00AD\u2010\u2011\u2212]/g,
-    label: "Hífen Especial",
-    exemplo: "­"
-  }
+// Lista de marcas/caracteres especiais (mantenha conforme seu original)
+const marcas = [
+  { regex: /[\u2018\u2019]/g, nome: "Aspa simples tipográfica (‘ ’)" },
+  { regex: /[\u201C\u201D]/g, nome: "Aspa dupla tipográfica (“ ”)" },
+  { regex: /[\u2013]/g, nome: "En Dash (–)" },
+  { regex: /[\u2014]/g, nome: "Em Dash (—)" },
+  { regex: /[\u2026]/g, nome: "Reticências (…)" },
+  { regex: /[\u00A0]/g, nome: "Espaço Não Quebrável (NBSP)" },
+  { regex: /[\u200B-\u200D]/g, nome: "Espaço Invisível (ZWSP, ZWNJ, ZWJ)" },
+  { regex: /[\u2060]/g, nome: "Word Joiner (invisível)" },
+  { regex: /[\u202F]/g, nome: "Espaço Estreito (Narrow NBSP)" },
+  { regex: /[\uFEFF]/g, nome: "Byte Order Mark (invisível)" },
+  { regex: /[\u00AD]/g, nome: "Soft Hyphen (­)" },
+  { regex: /[\u2212]/g, nome: "Minus Matemático (−)" },
+  { regex: /[\u2010\u2011]/g, nome: "Hífen especial (‐ ‑)" },
+  { regex: /[\u2800]/g, nome: "Braille Blank (⠀)" },
+  { regex: /[\u3164]/g, nome: "Hangul Filler (ㅤ)" },
+  { regex: /[\u200E\u200F]/g, nome: "Direcionalidade (LRM, RLM)" }
 ];
 
-// Função para detectar todas as marcas no texto
-function detectarMarcas(texto) {
+function detectaMarcas(texto) {
   let encontrados = [];
-  tiposMarcas.forEach((tipo, idx) => {
-    let regex = new RegExp(tipo.regex);
+  marcas.forEach((marca) => {
     let resultado;
+    let regex = new RegExp(marca.regex);
     while ((resultado = regex.exec(texto)) !== null) {
       encontrados.push({
         caractere: resultado[0],
-        tipo,
-        idx,
+        nome: marca.nome,
         posicao: resultado.index
       });
     }
   });
-  return encontrados.sort((a, b) => a.posicao - b.posicao);
+  return encontrados;
 }
 
-// Função para limpar o texto das marcas
-function limparTexto(texto) {
+function limpaTexto(texto) {
   let textoLimpo = texto;
-  tiposMarcas.forEach((tipo) => {
-    textoLimpo = textoLimpo.replace(tipo.regex, "");
+  marcas.forEach((marca) => {
+    textoLimpo = textoLimpo.replace(marca.regex, "");
   });
   return textoLimpo;
 }
 
 export default function App() {
   const [texto, setTexto] = useState("");
-  const [marcas, setMarcas] = useState([]);
+  const [marcasDetectadas, setMarcasDetectadas] = useState([]);
   const [textoLimpo, setTextoLimpo] = useState("");
-  const [copiado, setCopiado] = useState(false);
+  const [avisocopiado, setAvisoCopiado] = useState(false);
 
-  // Detecta marcas sempre que o texto muda
+  // Detectar marcas toda vez que o texto mudar
   React.useEffect(() => {
-    setMarcas(detectarMarcas(texto));
-    setTextoLimpo("");
-    setCopiado(false);
+    if (!texto) {
+      setMarcasDetectadas([]);
+      return;
+    }
+    setMarcasDetectadas(detectaMarcas(texto));
   }, [texto]);
 
-  // Limpa texto e copia
-  function handleLimpar() {
-    const limpo = limparTexto(texto);
+  // Limpar texto e copiar ao clicar no botão
+  const handleLimpaTexto = () => {
+    const limpo = limpaTexto(texto);
     setTextoLimpo(limpo);
     navigator.clipboard.writeText(limpo);
-    setCopiado(true);
-  }
-
-  // Gera análise do texto com destaques coloridos
-  function renderAnalise() {
-    if (!texto) {
-      return (
-        <span style={{ color: "#888" }}>
-          O texto analisado aparecerá aqui com os caracteres suspeitos destacados...
-        </span>
-      );
-    }
-    if (marcas.length === 0) {
-      return (
-        <span style={{ color: "#4CAF50", fontWeight: 500 }}>
-          Nenhuma marca suspeita encontrada!
-        </span>
-      );
-    }
-    // Monta o texto destacando as marcas
-    let resultado = [];
-    let lastIndex = 0;
-    marcas.forEach((m, i) => {
-      if (m.posicao > lastIndex)
-        resultado.push(texto.slice(lastIndex, m.posicao));
-      resultado.push(
-        <span
-          key={i}
-          style={{
-            background: m.tipo.cor,
-            color: "#fff",
-            borderRadius: 3,
-            padding: "1px 4px",
-            margin: "0 1px",
-            fontWeight: 600,
-            fontSize: "inherit"
-          }}
-          title={m.tipo.nome}
-        >
-          {m.caractere}
-        </span>
-      );
-      lastIndex = m.posicao + m.caractere.length;
-    });
-    resultado.push(texto.slice(lastIndex));
-    return resultado;
-  }
-
-  // Estatísticas
-  const estatisticas = React.useMemo(() => {
-    let obj = {};
-    tiposMarcas.forEach((t) => (obj[t.nome] = 0));
-    marcas.forEach((m) => (obj[m.tipo.nome] = obj[m.tipo.nome] + 1));
-    return obj;
-  }, [marcas]);
-
-  // Contagem total de marcas
-  const totalMarcas = marcas.length;
+    setAvisoCopiado(true);
+    setTimeout(() => setAvisoCopiado(false), 2000);
+  };
 
   return (
-    <div style={{
-      fontFamily: "Lato, Arial, sans-serif",
-      background: "#e7eaf6",
-      minHeight: "100vh",
-      padding: 0,
-      margin: 0
-    }}>
+    <div className="container-bg">
       {/* Topo */}
-      <div style={{ textAlign: "center", padding: "36px 10px 12px 10px" }}>
-        <span
-          className="material-icons"
-          style={{ color: "#6c63ff", fontSize: 44, verticalAlign: "middle" }}
-        >search</span>
-        <div style={{
-          fontFamily: "Poppins, Arial, sans-serif",
-          fontWeight: 900,
-          fontSize: 38,
-          letterSpacing: -2,
-          color: "#E31937",
-          marginBottom: 3
-        }}>
-          LIMPA RASTROS DE IA
+      <header className="header-topo">
+        <div className="logo-titulo">
+          <span className="material-icons search-icon">search</span>
+          <h1>LIMPA RASTROS DE IA</h1>
         </div>
-        <div style={{ color: "#555", fontSize: 18, marginBottom: 24 }}>
+        <p className="subtitulo">
           Identifique e remova caracteres que podem indicar texto gerado por IA.
-        </div>
-      </div>
+        </p>
+      </header>
 
-      {/* Tipos de caracteres detectados (legenda) */}
-      <div style={{
-        maxWidth: 950,
-        margin: "0 auto 18px auto",
-        background: "#fff",
-        borderRadius: 12,
-        padding: "18px 18px 6px 18px",
-        border: "1px solid #eee",
-        boxShadow: "0 2px 10px #0001"
-      }}>
-        <div style={{
-          fontWeight: 700,
-          fontSize: 17,
-          marginBottom: 10,
-          color: "#232323"
-        }}>
-          Tipos de Caracteres Detectados:
-        </div>
-        <div style={{
-          display: "flex",
-          flexWrap: "wrap",
-          gap: "14px 32px"
-        }}>
-          {tiposMarcas.map((t, i) => (
-            <div key={i} style={{ display: "flex", alignItems: "center", fontSize: 15 }}>
-              <span style={{
-                display: "inline-block",
-                width: 18,
-                height: 18,
-                borderRadius: 4,
-                background: t.cor,
-                marginRight: 8,
-                border: "1px solid #ddd",
-                fontWeight: "bold",
-                color: "#fff",
-                textAlign: "center",
-                lineHeight: "18px"
-              }}>{t.exemplo}</span>
-              {t.nome}
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Legenda dos Tipos de Caracteres */}
+      <section className="tipos-caracteres-bloco">
+        <h2>Tipos de Caracteres Detectados:</h2>
+        <ul className="tipos-lista">
+          <li><span className="tag t1" /> Travessões (Em Dash, En Dash, Three-Em Dash)</li>
+          <li><span className="tag t2" /> Espaços Especiais (Em Space, En Space, NBSP, etc.)</li>
+          <li><span className="tag t3" /> Espaços Invisíveis (ZWSP, ZWNJ, ZWJ, etc.)</li>
+          <li><span className="tag t4" /> Aspas Tipográficas (Left/Right Single/Double Quotes)</li>
+          <li><span className="tag t5" /> Hífens Especiais (Soft Hyphen, Non-Breaking Hyphen, Minus)</li>
+          <li><span className="tag t6" /> Controles Direcionais (LRM, RLM, RLO)</li>
+          <li><span className="tag t7" /> Caracteres Invisíveis (Function App, Invisible Times, etc.)</li>
+          <li><span className="tag t8" /> Caracteres Especiais (Braille Blank, Hangul Filler)</li>
+        </ul>
+      </section>
 
-      {/* Área principal */}
-      <div style={{
-        maxWidth: 950,
-        margin: "0 auto",
-        display: "flex",
-        gap: 28,
-        alignItems: "flex-start",
-        flexWrap: "wrap"
-      }}>
-        {/* Caixa Texto Original */}
-        <div style={{
-          flex: 1,
-          minWidth: 260,
-          background: "#fff",
-          borderRadius: 12,
-          border: "1px solid #eee",
-          padding: 16,
-          boxShadow: "0 1px 8px #0001",
-          marginBottom: 14
-        }}>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 17,
-            marginBottom: 8,
-            color: "#222",
-            display: "flex",
-            alignItems: "center"
-          }}>
-            <span className="material-icons" style={{
-              fontSize: 22, color: "#666", marginRight: 6
-            }}>description</span>
-            Texto Original
+      {/* Duas caixas lado a lado */}
+      <main className="caixas-area">
+        <div className="caixa-texto">
+          <div className="caixa-titulo">
+            <span className="material-icons">description</span>
+            <span>Texto Original</span>
           </div>
           <textarea
-            value={texto}
-            onChange={e => setTexto(e.target.value)}
-            rows={10}
-            style={{
-              width: "100%",
-              resize: "vertical",
-              borderRadius: 8,
-              border: "1.5px solid #d3d3d3",
-              padding: 12,
-              fontSize: 16,
-              minHeight: 160
-            }}
+            className="text-area"
             placeholder="Cole ou digite seu texto aqui..."
+            value={texto}
+            onChange={e => {
+              setTexto(e.target.value);
+              setTextoLimpo("");
+              setAvisoCopiado(false);
+            }}
           />
         </div>
-        {/* Caixa Análise dos Caracteres */}
-        <div style={{
-          flex: 1,
-          minWidth: 260,
-          background: "#fff",
-          borderRadius: 12,
-          border: "1px solid #eee",
-          padding: 16,
-          boxShadow: "0 1px 8px #0001",
-          marginBottom: 14,
-          minHeight: 201
-        }}>
-          <div style={{
-            fontWeight: 700,
-            fontSize: 17,
-            marginBottom: 8,
-            color: "#222",
-            display: "flex",
-            alignItems: "center"
-          }}>
-            <span className="material-icons" style={{
-              fontSize: 22, color: "#666", marginRight: 6
-            }}>search</span>
-            Análise dos Caracteres
+        <div className="caixa-texto">
+          <div className="caixa-titulo">
+            <span className="material-icons">search</span>
+            <span>Análise dos Caracteres</span>
           </div>
-          <div style={{
-            fontFamily: "Lato, Arial, sans-serif",
-            fontSize: 16,
-            minHeight: 160,
-            whiteSpace: "pre-wrap",
-            wordBreak: "break-word",
-            background: "#f8fafc",
-            borderRadius: 8,
-            padding: 10,
-            color: "#222"
-          }}>
-            {renderAnalise()}
+          <div className="analise-box">
+            {texto ? (
+              marcasDetectadas.length ? (
+                <ul className="lista-marcas">
+                  {marcasDetectadas.map((m, i) => (
+                    <li key={i}>
+                      <b>{m.caractere}</b> <span className="desc">{m.nome}</span> <span className="pos">Posição: {m.posicao}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span>Nenhuma marca suspeita encontrada.</span>
+              )
+            ) : (
+              <span className="analise-placeholder">
+                O texto analisado aparecerá aqui com os caracteres suspeitos destacados...
+              </span>
+            )}
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* Estatísticas do Texto */}
-      <div style={{
-        maxWidth: 950,
-        margin: "0 auto 22px auto",
-        background: "#f8fafc",
-        borderRadius: 12,
-        border: "1px solid #eee",
-        boxShadow: "0 2px 10px #0001",
-        padding: "18px 10px 12px 10px",
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 18,
-        justifyContent: "center"
-      }}>
-        <div style={{
-          fontWeight: 700,
-          fontSize: 18,
-          width: "100%",
-          marginBottom: 12,
-          color: "#232323",
-          textAlign: "center"
-        }}>
-          <span className="material-icons" style={{
-            fontSize: 21, color: "#6c63ff", verticalAlign: "middle"
-          }}>insights</span>
-          {" "}Estatísticas do Texto
+      {/* Estatísticas */}
+      <section className="estatisticas">
+        <h3>📊 Estatísticas do Texto</h3>
+        <div className="estat-cards">
+          <div className="estat-card"><b>{texto.length}</b><span>Total de Caracteres</span></div>
+          <div className="estat-card"><b>{marcasDetectadas.length}</b><span>Total de Marcas</span></div>
+          <div className="estat-card"><b>{marcasDetectadas.filter(m => m.nome.includes("Aspa simples")).length}</b><span>Aspas Simples</span></div>
+          <div className="estat-card"><b>{marcasDetectadas.filter(m => m.nome.includes("Aspa dupla")).length}</b><span>Aspas Duplas</span></div>
+          <div className="estat-card"><b>{marcasDetectadas.filter(m => m.nome.includes("Em Dash") || m.nome.includes("En Dash")).length}</b><span>Travessões</span></div>
+          <div className="estat-card"><b>{marcasDetectadas.filter(m => m.nome.includes("Espaço Não Quebrável") || m.nome.includes("NBSP")).length}</b><span>Espaços Especiais</span></div>
         </div>
-        {/* Total de marcas */}
-        <div style={estatCardStyle}>
-          <span className="material-icons" style={iconStyle("#E57373")}>flag</span>
-          <div style={statNum}>{totalMarcas}</div>
-          <div style={statLabel}>Total de Marcas</div>
-        </div>
-        {/* Um card para cada tipo de marca */}
-        {tiposMarcas.map((t, i) => (
-          <div key={i} style={estatCardStyle}>
-            <span className="material-icons" style={iconStyle(t.cor)}>check_box</span>
-            <div style={statNum}>{estatisticas[t.nome]}</div>
-            <div style={statLabel}>{t.label}</div>
-          </div>
-        ))}
-      </div>
+      </section>
 
-      {/* Botão Limpar */}
-      <div style={{
-        textAlign: "center",
-        marginBottom: 38
-      }}>
-        <button
-          onClick={handleLimpar}
-          disabled={!texto}
-          style={{
-            background: "#E31937",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 18,
-            border: "none",
-            borderRadius: 8,
-            padding: "16px 36px",
-            cursor: texto ? "pointer" : "not-allowed",
-            opacity: texto ? 1 : 0.5,
-            minWidth: 240,
-            boxShadow: "0 2px 8px #0002",
-            transition: "all .15s"
-          }}
-        >
-          <span className="material-icons" style={{
-            fontSize: 22,
-            verticalAlign: "middle",
-            marginRight: 6
-          }}>cleaning_services</span>
+      {/* Botão Limpar e copiar */}
+      <div className="botoes-area">
+        <button className="btn-limpar" onClick={handleLimpaTexto} disabled={!texto}>
           Limpar Texto e Copiar
         </button>
-        {copiado &&
-          <div style={{
-            marginTop: 10,
-            color: "#229954",
-            fontWeight: 600,
-            fontSize: 16
-          }}>
-            Texto limpo copiado para a área de transferência!
-          </div>
-        }
+        {avisocopiado && (
+          <span className="aviso-copiado">Texto limpo copiado para a área de transferência!</span>
+        )}
       </div>
     </div>
   );
 }
-
-// Estilos para estatísticas
-const estatCardStyle = {
-  minWidth: 120,
-  flex: "1 0 120px",
-  background: "#fff",
-  borderRadius: 8,
-  padding: "14px 10px",
-  margin: "6px 4px",
-  textAlign: "center",
-  boxShadow: "0 1px 8px #0001",
-  border: "1px solid #eee",
-  display: "flex",
-  flexDirection: "column",
-  alignItems: "center"
-};
-
-const iconStyle = (cor) => ({
-  fontSize: 30,
-  color: cor,
-  marginBottom: 4
-});
-
-const statNum = {
-  fontSize: 25,
-  fontWeight: 800,
-  color: "#222"
-};
-
-const statLabel = {
-  fontSize: 15,
-  color: "#666"
-};
