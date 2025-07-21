@@ -1,110 +1,223 @@
-/* Fontes personalizadas */
+/* FONTS */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;600&family=Lato:wght@400;300&family=Montserrat:wght@400&display=swap');
 
-/* Cores */
 :root {
-  --vermelho-figueira: #E31937;
+  --vermelho: #E31937;
   --preto: #000000;
   --branco: #FFFFFF;
-  --bege: #f7f4ed;
+  --areia: #f7f4ed;
   --cinza-escuro: #2C2C2C;
+  --cinza-caixa: #f7f4ed;
+  --cinza-borda: #E7E7E7;
+  --azul-destaque: #4481f6;
+  --laranja-destaque: #ffae42;
+  --verde-btn: #14b76d;
+  --cinza-fundo: #ececff;
 }
 
-/* Reset básico */
 body {
-  margin: 0;
-  background: var(--bege);
-  font-family: 'Lato', Arial, Helvetica, sans-serif;
+  background: var(--areia);
+  font-family: 'Lato', 'Montserrat', Arial, sans-serif;
   color: var(--preto);
+  margin: 0;
+  padding: 0;
 }
+
+.app-bg {
+  background: var(--cinza-fundo);
+  min-height: 100vh;
+  padding: 32px 0;
+}
+
+.header-title {
+  text-align: center;
+  color: var(--vermelho);
+  font-family: 'Poppins', 'Montserrat', Arial, sans-serif;
+  font-weight: 700;
+  font-size: 2.8rem;
+  margin-bottom: 0;
+  letter-spacing: -2px;
+}
+
+.header-subtitle {
+  text-align: center;
+  font-family: 'Lato', Arial, sans-serif;
+  color: var(--cinza-escuro);
+  margin: 12px 0 28px 0;
+  font-size: 1.15rem;
+}
+
+.legend-box {
+  background: var(--branco);
+  border-radius: 14px;
+  box-shadow: 0 2px 8px #0001;
+  margin: 0 auto 26px auto;
+  max-width: 1000px;
+  padding: 18px 24px 12px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border: 1px solid var(--cinza-borda);
+}
+.legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px 36px;
+  margin-top: 6px;
+  margin-bottom: 0;
+  font-size: 1rem;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-family: 'Lato', Arial, sans-serif;
+}
+.legend-color {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  display: inline-block;
+  margin-right: 7px;
+}
+.lg-trav { background: #e57373; }
+.lg-esp { background: #4481f6; }
+.lg-inv { background: #ffae42; }
+.lg-ctrl { background: #1ab099; }
+.lg-func { background: #7be495; }
+.lg-tip { background: #b276ea; }
+.lg-hif { background: #e31937; }
+.lg-braille { background: #b3af81; }
 
 .main-container {
   max-width: 1100px;
-  margin: 32px auto;
-  padding: 24px;
-  background: var(--branco);
-  border-radius: 18px;
-  box-shadow: 0 6px 32px #0001;
-}
-
-/* Tipos de caracteres */
-.types-box {
-  margin-bottom: 22px;
-  padding: 18px 28px;
-  background: var(--branco);
-  border-radius: 12px;
-  box-shadow: 0 2px 16px #0000000d;
-}
-
-/* Caixa dupla */
-.double-box {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 28px;
-}
-
-.caixa {
-  flex: 1;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 2px 16px #0000000c;
-  padding: 18px 20px 20px 20px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  min-width: 360px;
-  max-width: 50%;
+  gap: 22px;
 }
 
-.caixa textarea,
-.caixa .analise-box {
-  width: 100%;
-  min-height: 220px;
-  max-height: 300px;
-  border-radius: 10px;
-  border: 1.5px solid #ececec;
-  padding: 18px;
+.top-section {
+  display: flex;
+  flex-direction: row;
+  gap: 22px;
+}
+
+.text-box, .result-box {
+  flex: 1;
+  background: var(--branco);
+  border-radius: 18px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 20px 20px 20px 20px;
+  min-width: 350px;
+  min-height: 260px;
+  border: 1px solid var(--cinza-borda);
+  display: flex;
+  flex-direction: column;
+}
+.text-box { margin-bottom: 0; }
+.result-box { margin-bottom: 0; }
+
+.text-box label, .result-box label {
+  font-family: 'Poppins', 'Montserrat', Arial, sans-serif;
   font-size: 1.2rem;
-  background: #f7f4ed;
-  resize: none;
-  font-family: 'Lato', Arial, Helvetica, sans-serif;
-}
-
-.caixa textarea {
-  color: #222;
-  outline: none;
-  font-size: 1.18rem;
-  font-family: 'Lato', Arial, Helvetica, sans-serif;
-}
-
-.titulo-caixa {
-  font-family: 'Poppins', Arial, sans-serif;
+  color: var(--cinza-escuro);
   font-weight: 600;
-  font-size: 1.35rem;
-  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
+  margin-bottom: 10px;
 }
 
-.analise-box {
-  font-size: 1.15rem;
-  color: #888;
-  background: #f7f4ed;
-  border: 1.5px solid #ececec;
-  border-radius: 10px;
-  min-height: 220px;
-  max-height: 300px;
-  padding: 18px;
+.text-area, .result-area {
+  border-radius: 12px;
+  border: 1px solid var(--cinza-borda);
+  padding: 15px 16px;
+  font-size: 1.1rem;
+  resize: none;
+  min-height: 140px;
+  width: 100%;
+  font-family: 'Lato', Arial, sans-serif;
+  color: var(--cinza-escuro);
+  background: #fafaff;
 }
 
-/* Responsivo */
+.result-area {
+  background: #f8fafc;
+  color: var(--cinza-escuro);
+  font-style: italic;
+}
+
+.stats-section {
+  background: #d5dae9;
+  border-radius: 14px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0 18px 0;
+  align-items: center;
+  border: 1px solid #d1d7e6;
+}
+
+.stats-title {
+  font-family: 'Poppins', 'Montserrat', Arial, sans-serif;
+  font-size: 1.22rem;
+  color: var(--cinza-escuro);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.stats-cards {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px 18px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.stats-card {
+  background: var(--branco);
+  border-radius: 12px;
+  min-width: 155px;
+  min-height: 62px;
+  box-shadow: 0 2px 8px #0001;
+  padding: 10px 0 2px 0;
+  font-family: 'Lato', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 1.12rem;
+  color: var(--cinza-escuro);
+  border: 1px solid #e4e6ea;
+}
+.stats-value {
+  font-size: 1.6rem;
+  color: var(--vermelho);
+  font-weight: 700;
+}
+
+.btn-limpar {
+  margin: 30px auto 0 auto;
+  display: block;
+  background: var(--vermelho);
+  color: var(--branco);
+  font-family: 'Poppins', Arial, sans-serif;
+  font-size: 1.19rem;
+  padding: 12px 38px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 12px #e3193720;
+  transition: background 0.2s;
+}
+.btn-limpar:hover { background: #b0162a; }
+
 @media (max-width: 900px) {
-  .double-box {
-    flex-direction: column;
-    gap: 18px;
-  }
-  .caixa {
-    max-width: 100%;
-    min-width: 0;
-  }
+  .main-container, .legend-box { max-width: 99vw; }
+  .top-section { flex-direction: column; gap: 14px;}
 }
