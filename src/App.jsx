@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "./styles.css";
+import "./style.css";
 
 // Lista de marcas/caracteres especiais (mantenha conforme seu original)
 const marcas = [
