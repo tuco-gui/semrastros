@@ -202,3 +202,11 @@ header {
   .box-texto, .box-analise { min-width: 90vw; }
   .estatisticas-grid { gap: 12px 6px; }
 }
+.char-destaque {
+  font-weight: 700 !important;
+  border-radius: 6px;
+  padding: 2px 4px;
+  margin: 0 1px;
+  background: #fff;
+  /* Você já usa as classes de cor (.vermelho, .azul etc) no CSS! */
+}
