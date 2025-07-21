@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 // Lista de marcas (caracteres de IA)
 const marcas = [
@@ -20,6 +20,7 @@ const marcas = [
   { regex: /[\u200E\u200F]/g, nome: "Direcionalidade (LRM, RLM)" }
 ];
 
+// Detecta marcas e retorna array de objetos
 function detectaMarcas(texto) {
   let encontrados = [];
   marcas.forEach((marca) => {
@@ -36,6 +37,7 @@ function detectaMarcas(texto) {
   return encontrados;
 }
 
+// Limpa todas as marcas do texto
 function limpaTexto(texto) {
   let textoLimpo = texto;
   marcas.forEach((marca) => {
@@ -49,7 +51,23 @@ export default function App() {
   const [marcasDetectadas, setMarcasDetectadas] = useState([]);
   const [textoLimpo, setTextoLimpo] = useState("");
   const [avisocopiado, setAvisoCopiado] = useState(false);
-  const [idioma, setIdioma] = useState("pt");
+
+  // Analisa automaticamente quando texto muda
+  useEffect(() => {
+    setMarcasDetectadas(detectaMarcas(texto));
+    setTextoLimpo("");
+    setAvisoCopiado(false);
+  }, [texto]);
+
+  // Limpa e copia texto limpo
+  const handleLimpaTexto = () => {
+    const limpo = limpaTexto(texto);
+    setTextoLimpo(limpo);
+    if (limpo) {
+      navigator.clipboard.writeText(limpo);
+      setAvisoCopiado(true);
+    }
+  };
 
   // Upload .txt
   const handleFileUpload = async (event) => {
@@ -59,48 +77,15 @@ export default function App() {
       const text = await file.text();
       setTexto(text);
     } else {
-      alert(
-        idioma === "pt"
-          ? "Apenas arquivos .txt são suportados nesta versão."
-          : "Only .txt files are supported in this version."
-      );
+      alert("Apenas arquivos .txt são suportados.");
     }
-  };
-
-  // Ao alterar texto
-  const onTextoChange = (e) => {
-    setTexto(e.target.value);
-    setTextoLimpo("");
-    setAvisoCopiado(false);
-  };
-
-  // Detectar marcas toda vez que o texto mudar
-  React.useEffect(() => {
-    if (!texto) {
-      setMarcasDetectadas([]);
-      return;
-    }
-    setMarcasDetectadas(detectaMarcas(texto));
-  }, [texto]);
-
-  // Limpar texto e copiar ao clicar no botão
-  const handleLimpaTexto = () => {
-    const limpo = limpaTexto(texto);
-    setTextoLimpo(limpo);
-    navigator.clipboard.writeText(limpo);
-    setAvisoCopiado(true);
-  };
-
-  // Trocar idioma
-  const trocaIdioma = () => {
-    setIdioma((old) => (old === "pt" ? "en" : "pt"));
   };
 
   return (
     <div
       style={{
         fontFamily: "sans-serif",
-        background: "#f8f9fa",
+        background: "#f7f7fa",
         minHeight: "100vh",
         padding: 0,
         margin: 0
@@ -108,21 +93,12 @@ export default function App() {
     >
       <div
         style={{
-          maxWidth: 980,
+          maxWidth: 950,
           margin: "0 auto",
           padding: 24
         }}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <h2>
-            {idioma === "pt"
-              ? "Detector e Limpador de Marcas de IA"
-              : "AI Marks Detector & Cleaner"}
-          </h2>
-          <button onClick={trocaIdioma} style={{ fontSize: 16 }}>
-            {idioma === "pt" ? "EN" : "PT"}
-          </button>
-        </div>
+        <h2 style={{ marginBottom: 16 }}>Detector e Limpador de Marcas de IA</h2>
         <div
           style={{
             display: "flex",
@@ -131,15 +107,13 @@ export default function App() {
           }}
         >
           {/* Caixa de texto */}
-          <div style={{ flex: 1, minWidth: 280 }}>
+          <div style={{ flex: 1, minWidth: 300 }}>
             <label style={{ fontWeight: 600, fontSize: 16 }}>
-              {idioma === "pt"
-                ? "Cole ou digite seu texto:"
-                : "Paste or type your text:"}
+              Cole ou digite seu texto:
             </label>
             <textarea
               value={texto}
-              onChange={onTextoChange}
+              onChange={e => setTexto(e.target.value)}
               rows={12}
               style={{
                 width: "100%",
@@ -149,11 +123,7 @@ export default function App() {
                 borderRadius: 8,
                 fontSize: 15
               }}
-              placeholder={
-                idioma === "pt"
-                  ? "Cole aqui seu texto ou faça upload de .txt"
-                  : "Paste your text here or upload .txt"
-              }
+              placeholder="Cole aqui seu texto ou faça upload de .txt"
             />
             <input
               type="file"
@@ -162,10 +132,11 @@ export default function App() {
               onChange={handleFileUpload}
             />
           </div>
+
           {/* Caixa de análise */}
-          <div style={{ flex: 1, minWidth: 280 }}>
+          <div style={{ flex: 1, minWidth: 300 }}>
             <label style={{ fontWeight: 600, fontSize: 16 }}>
-              {idioma === "pt" ? "Marcas detectadas:" : "Marks detected:"}
+              Análise automática:
             </label>
             <div
               style={{
@@ -176,15 +147,13 @@ export default function App() {
                 padding: 12,
                 minHeight: 180,
                 fontSize: 15,
-                maxHeight: 280,
+                maxHeight: 260,
                 overflowY: "auto"
               }}
             >
               {marcasDetectadas.length === 0 ? (
                 <span style={{ color: "#888" }}>
-                  {idioma === "pt"
-                    ? "Nenhuma marca detectada."
-                    : "No marks detected."}
+                  Nenhuma marca detectada.
                 </span>
               ) : (
                 <ul style={{ paddingLeft: 18 }}>
@@ -195,8 +164,38 @@ export default function App() {
                       </span>{" "}
                       <span style={{ color: "#666" }}>({m.nome})</span>{" "}
                       <span style={{ color: "#bbb" }}>
-                        {idioma === "pt" ? "Posição" : "Position"}: {m.posicao}
+                        Posição: {m.posicao}
                       </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+            {/* Estatísticas */}
+            <div
+              style={{
+                marginTop: 16,
+                background: "#f9f9fc",
+                border: "1px solid #e3e3ef",
+                borderRadius: 8,
+                padding: 10
+              }}
+            >
+              <b>Resumo das marcas encontradas:</b>
+              {marcasDetectadas.length === 0 ? (
+                <span style={{ color: "#888", marginLeft: 8 }}>
+                  Nenhuma marca foi identificada no texto.
+                </span>
+              ) : (
+                <ul style={{ margin: 0 }}>
+                  {Object.entries(
+                    marcasDetectadas.reduce((acc, cur) => {
+                      acc[cur.nome] = (acc[cur.nome] || 0) + 1;
+                      return acc;
+                    }, {})
+                  ).map(([nome, qtd], i) => (
+                    <li key={i}>
+                      <b>{nome}:</b> {qtd}
                     </li>
                   ))}
                 </ul>
@@ -204,50 +203,16 @@ export default function App() {
             </div>
           </div>
         </div>
-        {/* Estatísticas */}
-        <div
-          style={{
-            margin: "18px 0 0 0",
-            background: "#fff",
-            border: "1px solid #ddd",
-            borderRadius: 8,
-            padding: 16
-          }}
-        >
-          <h4 style={{ margin: "0 0 8px 0" }}>
-            {idioma === "pt" ? "Resumo das marcas encontradas" : "Summary of marks found"}
-          </h4>
-          {marcasDetectadas.length === 0 ? (
-            <span style={{ color: "#888" }}>
-              {idioma === "pt"
-                ? "Nenhuma marca foi identificada no texto."
-                : "No marks were found in the text."}
-            </span>
-          ) : (
-            <ul style={{ margin: 0 }}>
-              {Object.entries(
-                marcasDetectadas.reduce((acc, cur) => {
-                  acc[cur.nome] = (acc[cur.nome] || 0) + 1;
-                  return acc;
-                }, {})
-              ).map(([nome, qtd], i) => (
-                <li key={i}>
-                  <b>{nome}:</b> {qtd}
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-        {/* Botão Limpa Texto */}
+        {/* Botão Limpar Texto */}
         <div style={{ margin: "24px 0 8px 0", textAlign: "center" }}>
           <button
             onClick={handleLimpaTexto}
             disabled={!texto}
             style={{
-              padding: "10px 28px",
+              padding: "12px 34px",
               borderRadius: 8,
               fontSize: 16,
-              background: "#1a82e2",
+              background: "#28a745",
               color: "#fff",
               border: "none",
               cursor: texto ? "pointer" : "not-allowed",
@@ -255,10 +220,10 @@ export default function App() {
               fontWeight: 600
             }}
           >
-            {idioma === "pt" ? "Limpa Texto" : "Clean Text"}
+            Limpar Texto
           </button>
         </div>
-        {/* Texto limpo */}
+        {/* Texto limpo e mensagem */}
         {textoLimpo && (
           <div
             style={{
@@ -266,11 +231,11 @@ export default function App() {
               borderRadius: 8,
               padding: 12,
               background: "#f7fbfa",
-              marginTop: 10
+              marginTop: 12
             }}
           >
             <label style={{ fontWeight: 600 }}>
-              {idioma === "pt" ? "Texto limpo (copiado!):" : "Clean text (copied!)"}
+              Texto limpo (copiado!):
             </label>
             <textarea
               readOnly
@@ -282,31 +247,3 @@ export default function App() {
                 padding: 10,
                 borderRadius: 6,
                 border: "1px solid #ccc",
-                fontSize: 15,
-                background: "#f9f9f9"
-              }}
-              onFocus={e => e.target.select()}
-            />
-            {avisocopiado && (
-              <div style={{ color: "#27a745", fontWeight: 500, marginTop: 4 }}>
-                {idioma === "pt"
-                  ? "Texto limpo copiado para a área de transferência!"
-                  : "Clean text copied to clipboard!"}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-      <footer
-        style={{
-          marginTop: 40,
-          textAlign: "center",
-          color: "#aaa",
-          fontSize: 14
-        }}
-      >
-        Detector IA Text Cleaner | Desenvolvido por ChatGPT para {window.location.hostname}
-      </footer>
-    </div>
-  );
-}
