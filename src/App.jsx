@@ -1,209 +1,274 @@
-Perfeito, segue o **App.jsx** já alterado e fiel ao seu modelo/prints, com quadro de tipos de caracteres no topo, caixas lado a lado, análise apenas informativa quando vazio, estatísticas no rodapé **(com tudo zerado até inserir texto)**, fontes e espaçamentos otimizados para visual profissional.
-Só **copie e cole tudo** no seu `src/App.jsx`.
+import React, { useState } from "react";
 
----
-
-```jsx
-import React, { useState, useEffect } from "react";
-
-// Cores e fontes principais
-const COLORS = {
-  vermelho: "#E31937",
-  preto: "#000000",
-  branco: "#FFFFFF",
-  bege: "#f7f4ed",
-  cinza: "#2C2C2C",
-  azulClaro: "#eef4f8",
-  box: "#FFFFFF",
-  boxBorder: "#E7EAF3",
-  shadow: "0 4px 20px 0 rgba(44,44,44,0.06)"
-};
-
-// Configuração dos tipos de caracteres (para o quadro do topo e estatísticas)
-const tiposCaracteres = [
-  { label: "Travessões (Em Dash, En Dash, Three-Em Dash)", cor: "#e57373", stat: "travessoes" },
-  { label: "Espaços Especiais (Em Space, En Space, NBSP, etc.)", cor: "#fbc02d", stat: "espacosEspeciais" },
-  { label: "Espaços Invisíveis (ZWSP, ZWNJ, ZWJ, etc.)", cor: "#4fc3f7", stat: "espacosInvisiveis" },
-  { label: "Aspas Tipográficas (Left/Right Single/Double Quotes)", cor: "#ab47bc", stat: "aspasTipograficas" },
-  { label: "Controles Direcionais (LRM, RLM, RLO)", cor: "#ff7043", stat: "controlesDirecionais" },
-  { label: "Caracteres Invisíveis (Function App, Invisible Times, etc.)", cor: "#64b5f6", stat: "invisiveisFuncionais" },
-  { label: "Caracteres Especiais (Braille Blank, Hangul Filler)", cor: "#aed581", stat: "caracteresEspeciais" },
-  { label: "Hífens Especiais (Soft Hyphen, Non-Breaking Hyphen, Minus)", cor: "#90a4ae", stat: "hifensEspeciais" }
+// Tipos de marcas/caracteres IA
+const tiposMarcas = [
+  {
+    nome: "Travessões (Em Dash, En Dash, Three-Em Dash)",
+    cor: "#E57373",
+    regex: /[\u2013\u2014\u2015]/g,
+    label: "Travessão",
+    exemplo: "—"
+  },
+  {
+    nome: "Espaços Especiais (Em Space, En Space, NBSP, etc.)",
+    cor: "#42A5F5",
+    regex: /[\u2002\u2003\u2004\u2005\u2006\u2007\u2008\u2009\u200A\u202F\u205F\u00A0]/g,
+    label: "Esp. Especial",
+    exemplo: " "
+  },
+  {
+    nome: "Espaços Invisíveis (ZWSP, ZWNJ, ZWJ, etc.)",
+    cor: "#FFA726",
+    regex: /[\u200B\u200C\u200D]/g,
+    label: "Esp. Invisível",
+    exemplo: "‎"
+  },
+  {
+    nome: "Aspas Tipográficas (Left/Right Single/Double Quotes)",
+    cor: "#AB47BC",
+    regex: /[\u2018\u2019\u201A\u201B\u201C\u201D\u201E\u201F]/g,
+    label: "Aspa Tipográfica",
+    exemplo: "“"
+  },
+  {
+    nome: "Controles Direcionais (LRM, RLM, RLO)",
+    cor: "#26A69A",
+    regex: /[\u200E\u200F\u202A-\u202E]/g,
+    label: "Controle Dir.",
+    exemplo: "‎"
+  },
+  {
+    nome: "Caracteres Invisíveis (Function App, Invisible Times, etc.)",
+    cor: "#66BB6A",
+    regex: /[\u2060\uFEFF]/g,
+    label: "Inv. Funcional",
+    exemplo: "⁠"
+  },
+  {
+    nome: "Caracteres Especiais (Braille Blank, Hangul Filler)",
+    cor: "#BDB76B",
+    regex: /[\u2800\u3164]/g,
+    label: "Esp. Especial",
+    exemplo: "⠀"
+  },
+  {
+    nome: "Hífens Especiais (Soft Hyphen, Non-Breaking Hyphen, Minus)",
+    cor: "#EC407A",
+    regex: /[\u00AD\u2010\u2011\u2212]/g,
+    label: "Hífen Especial",
+    exemplo: "­"
+  }
 ];
 
-// Expressões para detecção (mapeadas para os nomes dos stats)
-const detectores = [
-  { regex: /[\u2013\u2014\u2015]/g, stat: "travessoes" }, // En dash, em dash, three-em dash
-  { regex: /[\u2000-\u200A\u00A0]/g, stat: "espacosEspeciais" }, // Em/En Space, NBSP, Thin, Hair, etc.
-  { regex: /[\u200B\u200C\u200D]/g, stat: "espacosInvisiveis" }, // ZWSP, ZWNJ, ZWJ
-  { regex: /[\u2018\u2019\u201A\u201B\u201C\u201D\u201E\u201F]/g, stat: "aspasTipograficas" }, // Tipográficas
-  { regex: /[\u200E\u200F\u202A-\u202E]/g, stat: "controlesDirecionais" }, // LRM, RLM, RLO, etc.
-  { regex: /[\u2060\u2061\u2062\u2063\u2064\uFEFF]/g, stat: "invisiveisFuncionais" }, // Funcionais
-  { regex: /[\u2800\u3164]/g, stat: "caracteresEspeciais" }, // Braille Blank, Hangul Filler
-  { regex: /[\u00AD\u2010\u2011\u2212]/g, stat: "hifensEspeciais" } // Hífens especiais
-];
-
-// Função para detectar todos os caracteres e estatísticas
-function analisarTexto(texto) {
-  let stats = {
-    total: texto.length,
-    travessoes: 0,
-    espacosEspeciais: 0,
-    espacosInvisiveis: 0,
-    aspasTipograficas: 0,
-    controlesDirecionais: 0,
-    invisiveisFuncionais: 0,
-    caracteresEspeciais: 0,
-    hifensEspeciais: 0
-  };
+// Função para detectar todas as marcas no texto
+function detectarMarcas(texto) {
   let encontrados = [];
-  detectores.forEach(({ regex, stat }) => {
+  tiposMarcas.forEach((tipo, idx) => {
+    let regex = new RegExp(tipo.regex);
     let resultado;
-    let local = 0;
-    let rgx = new RegExp(regex);
-    while ((resultado = rgx.exec(texto)) !== null) {
-      stats[stat]++;
+    while ((resultado = regex.exec(texto)) !== null) {
       encontrados.push({
         caractere: resultado[0],
-        tipo: stat,
+        tipo,
+        idx,
         posicao: resultado.index
       });
-      local++;
-      // segurança contra loop infinito em regex global
-      if (local > 2000) break;
     }
   });
-  return { stats, encontrados };
+  return encontrados.sort((a, b) => a.posicao - b.posicao);
 }
 
-// Função para limpar todos os caracteres indesejados
-function limpaTexto(texto) {
+// Função para limpar o texto das marcas
+function limparTexto(texto) {
   let textoLimpo = texto;
-  detectores.forEach(({ regex }) => {
-    textoLimpo = textoLimpo.replace(regex, "");
+  tiposMarcas.forEach((tipo) => {
+    textoLimpo = textoLimpo.replace(tipo.regex, "");
   });
   return textoLimpo;
 }
 
 export default function App() {
   const [texto, setTexto] = useState("");
-  const [analise, setAnalise] = useState({ stats: {}, encontrados: [] });
+  const [marcas, setMarcas] = useState([]);
   const [textoLimpo, setTextoLimpo] = useState("");
-  const [avisocopiado, setAvisoCopiado] = useState(false);
+  const [copiado, setCopiado] = useState(false);
 
-  useEffect(() => {
-    setAnalise(analisarTexto(texto));
+  // Detecta marcas sempre que o texto muda
+  React.useEffect(() => {
+    setMarcas(detectarMarcas(texto));
     setTextoLimpo("");
-    setAvisoCopiado(false);
+    setCopiado(false);
   }, [texto]);
 
-  function handleLimpaTexto() {
-    const limpo = limpaTexto(texto);
+  // Limpa texto e copia
+  function handleLimpar() {
+    const limpo = limparTexto(texto);
     setTextoLimpo(limpo);
-    if (limpo) {
-      navigator.clipboard.writeText(limpo);
-      setAvisoCopiado(true);
-    }
+    navigator.clipboard.writeText(limpo);
+    setCopiado(true);
   }
 
-  function handleFileUpload(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-    if (file.type === "text/plain") {
-      file.text().then(setTexto);
-    } else {
-      alert("Apenas arquivos .txt são suportados.");
+  // Gera análise do texto com destaques coloridos
+  function renderAnalise() {
+    if (!texto) {
+      return (
+        <span style={{ color: "#888" }}>
+          O texto analisado aparecerá aqui com os caracteres suspeitos destacados...
+        </span>
+      );
     }
+    if (marcas.length === 0) {
+      return (
+        <span style={{ color: "#4CAF50", fontWeight: 500 }}>
+          Nenhuma marca suspeita encontrada!
+        </span>
+      );
+    }
+    // Monta o texto destacando as marcas
+    let resultado = [];
+    let lastIndex = 0;
+    marcas.forEach((m, i) => {
+      if (m.posicao > lastIndex)
+        resultado.push(texto.slice(lastIndex, m.posicao));
+      resultado.push(
+        <span
+          key={i}
+          style={{
+            background: m.tipo.cor,
+            color: "#fff",
+            borderRadius: 3,
+            padding: "1px 4px",
+            margin: "0 1px",
+            fontWeight: 600,
+            fontSize: "inherit"
+          }}
+          title={m.tipo.nome}
+        >
+          {m.caractere}
+        </span>
+      );
+      lastIndex = m.posicao + m.caractere.length;
+    });
+    resultado.push(texto.slice(lastIndex));
+    return resultado;
   }
 
-  // --------------------------------------------
-  // INÍCIO DO RETORNO DO COMPONENTE (LAYOUT)
-  // --------------------------------------------
+  // Estatísticas
+  const estatisticas = React.useMemo(() => {
+    let obj = {};
+    tiposMarcas.forEach((t) => (obj[t.nome] = 0));
+    marcas.forEach((m) => (obj[m.tipo.nome] = obj[m.tipo.nome] + 1));
+    return obj;
+  }, [marcas]);
+
+  // Contagem total de marcas
+  const totalMarcas = marcas.length;
+
   return (
-    <div style={{ background: COLORS.bege, minHeight: "100vh", fontFamily: "Lato" }}>
-      {/* Título e quadro de tipos de caracteres */}
-      <div style={{ padding: "38px 0 16px 0", textAlign: "center" }}>
+    <div style={{
+      fontFamily: "Lato, Arial, sans-serif",
+      background: "#e7eaf6",
+      minHeight: "100vh",
+      padding: 0,
+      margin: 0
+    }}>
+      {/* Topo */}
+      <div style={{ textAlign: "center", padding: "36px 10px 12px 10px" }}>
+        <span
+          className="material-icons"
+          style={{ color: "#6c63ff", fontSize: 44, verticalAlign: "middle" }}
+        >search</span>
         <div style={{
-          fontFamily: "Poppins",
-          fontWeight: 700,
-          fontSize: 36,
-          color: COLORS.vermelho,
-          letterSpacing: "-1.5px",
-          marginBottom: 4
+          fontFamily: "Poppins, Arial, sans-serif",
+          fontWeight: 900,
+          fontSize: 38,
+          letterSpacing: -2,
+          color: "#E31937",
+          marginBottom: 3
         }}>
           LIMPA RASTROS DE IA
         </div>
-        <div style={{
-          color: COLORS.cinza,
-          fontFamily: "Montserrat",
-          fontSize: 17,
-          marginBottom: 16
-        }}>
-          Identifica caracteres Unicode que podem indicar texto gerado por inteligência artificial
+        <div style={{ color: "#555", fontSize: 18, marginBottom: 24 }}>
+          Identifique e remova caracteres que podem indicar texto gerado por IA.
         </div>
-        {/* Quadro horizontal de tipos de caracteres */}
+      </div>
+
+      {/* Tipos de caracteres detectados (legenda) */}
+      <div style={{
+        maxWidth: 950,
+        margin: "0 auto 18px auto",
+        background: "#fff",
+        borderRadius: 12,
+        padding: "18px 18px 6px 18px",
+        border: "1px solid #eee",
+        boxShadow: "0 2px 10px #0001"
+      }}>
         <div style={{
-          background: COLORS.branco,
-          borderRadius: 18,
-          boxShadow: COLORS.shadow,
-          border: `1.5px solid ${COLORS.boxBorder}`,
-          padding: "20px 18px",
-          maxWidth: 900,
-          margin: "0 auto 30px auto",
+          fontWeight: 700,
+          fontSize: 17,
+          marginBottom: 10,
+          color: "#232323"
+        }}>
+          Tipos de Caracteres Detectados:
+        </div>
+        <div style={{
           display: "flex",
           flexWrap: "wrap",
-          justifyContent: "center",
-          gap: 16
+          gap: "14px 32px"
         }}>
-          {tiposCaracteres.map((tipo, i) => (
-            <span key={i} style={{
-              borderRadius: 8,
-              background: tipo.cor + "20",
-              color: tipo.cor,
-              fontWeight: 600,
-              fontFamily: "Montserrat",
-              fontSize: 13,
-              border: `1.5px solid ${tipo.cor}70`,
-              padding: "5px 13px",
-              marginBottom: 6,
-              marginRight: 5,
-              display: "inline-block"
-            }}>
-              {tipo.label}
-            </span>
+          {tiposMarcas.map((t, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", fontSize: 15 }}>
+              <span style={{
+                display: "inline-block",
+                width: 18,
+                height: 18,
+                borderRadius: 4,
+                background: t.cor,
+                marginRight: 8,
+                border: "1px solid #ddd",
+                fontWeight: "bold",
+                color: "#fff",
+                textAlign: "center",
+                lineHeight: "18px"
+              }}>{t.exemplo}</span>
+              {t.nome}
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Caixas lado a lado */}
+      {/* Área principal */}
       <div style={{
-        maxWidth: 980,
+        maxWidth: 950,
         margin: "0 auto",
         display: "flex",
-        gap: 24,
-        justifyContent: "center",
-        alignItems: "flex-start"
+        gap: 28,
+        alignItems: "flex-start",
+        flexWrap: "wrap"
       }}>
-        {/* Caixa texto original */}
+        {/* Caixa Texto Original */}
         <div style={{
           flex: 1,
-          minWidth: 325,
-          background: COLORS.branco,
-          borderRadius: 18,
-          boxShadow: COLORS.shadow,
-          border: `1.5px solid ${COLORS.boxBorder}`,
-          padding: "18px 18px 15px 18px",
-          display: "flex",
-          flexDirection: "column"
+          minWidth: 260,
+          background: "#fff",
+          borderRadius: 12,
+          border: "1px solid #eee",
+          padding: 16,
+          boxShadow: "0 1px 8px #0001",
+          marginBottom: 14
         }}>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-            <span className="material-icons" style={{ color: COLORS.vermelho, fontSize: 22, marginRight: 6 }}>description</span>
-            <span style={{
-              fontFamily: "Poppins",
-              fontWeight: 600,
-              fontSize: 16,
-              color: COLORS.cinza
-            }}>Texto Original</span>
+          <div style={{
+            fontWeight: 700,
+            fontSize: 17,
+            marginBottom: 8,
+            color: "#222",
+            display: "flex",
+            alignItems: "center"
+          }}>
+            <span className="material-icons" style={{
+              fontSize: 22, color: "#666", marginRight: 6
+            }}>description</span>
+            Texto Original
           </div>
           <textarea
             value={texto}
@@ -211,217 +276,174 @@ export default function App() {
             rows={10}
             style={{
               width: "100%",
+              resize: "vertical",
+              borderRadius: 8,
+              border: "1.5px solid #d3d3d3",
               padding: 12,
-              border: `1.5px solid ${COLORS.boxBorder}`,
-              borderRadius: 10,
-              fontSize: 15,
-              fontFamily: "Lato",
-              marginBottom: 10,
-              minHeight: 164,
-              background: "#f7f4ed"
+              fontSize: 16,
+              minHeight: 160
             }}
-            placeholder="Cole aqui seu texto ou faça upload de .txt"
-          />
-          <input
-            type="file"
-            accept=".txt"
-            style={{ fontFamily: "Lato", fontSize: 14 }}
-            onChange={handleFileUpload}
+            placeholder="Cole ou digite seu texto aqui..."
           />
         </div>
-        {/* Caixa análise dos caracteres */}
+        {/* Caixa Análise dos Caracteres */}
         <div style={{
           flex: 1,
-          minWidth: 325,
-          background: COLORS.branco,
-          borderRadius: 18,
-          boxShadow: COLORS.shadow,
-          border: `1.5px solid ${COLORS.boxBorder}`,
-          padding: "18px 18px 15px 18px",
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 227,
-          maxHeight: 280
+          minWidth: 260,
+          background: "#fff",
+          borderRadius: 12,
+          border: "1px solid #eee",
+          padding: 16,
+          boxShadow: "0 1px 8px #0001",
+          marginBottom: 14,
+          minHeight: 201
         }}>
-          <div style={{ display: "flex", alignItems: "center", marginBottom: 8 }}>
-            <span className="material-icons" style={{ color: COLORS.azulClaro, fontSize: 22, marginRight: 6 }}>search</span>
-            <span style={{
-              fontFamily: "Poppins",
-              fontWeight: 600,
-              fontSize: 16,
-              color: COLORS.cinza
-            }}>Análise dos Caracteres</span>
+          <div style={{
+            fontWeight: 700,
+            fontSize: 17,
+            marginBottom: 8,
+            color: "#222",
+            display: "flex",
+            alignItems: "center"
+          }}>
+            <span className="material-icons" style={{
+              fontSize: 22, color: "#666", marginRight: 6
+            }}>search</span>
+            Análise dos Caracteres
           </div>
           <div style={{
-            borderRadius: 10,
+            fontFamily: "Lato, Arial, sans-serif",
+            fontSize: 16,
             minHeight: 160,
-            background: "#f7f4ed",
-            fontFamily: "Lato",
-            fontSize: 15,
-            color: COLORS.cinza,
-            padding: "14px 10px",
-            overflowY: "auto"
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-word",
+            background: "#f8fafc",
+            borderRadius: 8,
+            padding: 10,
+            color: "#222"
           }}>
-            {texto.length === 0 ? (
-              <span style={{ color: "#969696" }}>
-                O texto analisado aparecerá aqui com os caracteres suspeitos destacados...
-              </span>
-            ) : (
-              <ul style={{ paddingLeft: 20, margin: 0 }}>
-                {analise.encontrados.length === 0 ? (
-                  <li style={{ color: "#19A647", fontWeight: 600 }}>Nenhum caractere suspeito encontrado.</li>
-                ) : (
-                  analise.encontrados.map((m, i) => (
-                    <li key={i}>
-                      <span style={{
-                        fontWeight: 700,
-                        color: tiposCaracteres.find(t => t.stat === m.tipo)?.cor || COLORS.vermelho
-                      }}>
-                        {m.caractere === " " ? "[Espaço]" : m.caractere}
-                      </span>{" "}
-                      <span style={{ color: COLORS.cinza, fontWeight: 500 }}>
-                        ({tiposCaracteres.find(t => t.stat === m.tipo)?.label || m.tipo})
-                      </span>{" "}
-                      <span style={{ color: "#bbb" }}>
-                        Posição: {m.posicao}
-                      </span>
-                    </li>
-                  ))
-                )}
-              </ul>
-            )}
+            {renderAnalise()}
           </div>
         </div>
       </div>
-      {/* Estatísticas do texto */}
+
+      {/* Estatísticas do Texto */}
       <div style={{
-        maxWidth: 980,
-        margin: "24px auto 0 auto",
-        background: COLORS.branco,
-        borderRadius: 16,
-        border: `1.5px solid ${COLORS.boxBorder}`,
-        boxShadow: COLORS.shadow,
-        padding: "18px 0 8px 0",
+        maxWidth: 950,
+        margin: "0 auto 22px auto",
+        background: "#f8fafc",
+        borderRadius: 12,
+        border: "1px solid #eee",
+        boxShadow: "0 2px 10px #0001",
+        padding: "18px 10px 12px 10px",
         display: "flex",
         flexWrap: "wrap",
-        gap: 12,
-        justifyContent: "space-around"
+        gap: 18,
+        justifyContent: "center"
       }}>
-        <Stat label="Total de Caracteres" value={texto ? analise.stats.total : 0} icon="123" cor={COLORS.vermelho} />
-        <Stat label="Travessões" value={texto ? analise.stats.travessoes : 0} icon="drag_handle" cor="#e57373" />
-        <Stat label="Espaços Especiais" value={texto ? analise.stats.espacosEspeciais : 0} icon="space_bar" cor="#fbc02d" />
-        <Stat label="Espaços Invisíveis" value={texto ? analise.stats.espacosInvisiveis : 0} icon="blur_on" cor="#4fc3f7" />
-        <Stat label="Aspas Tipográficas" value={texto ? analise.stats.aspasTipograficas : 0} icon="format_quote" cor="#ab47bc" />
-        <Stat label="Controles Direcionais" value={texto ? analise.stats.controlesDirecionais : 0} icon="sync_alt" cor="#ff7043" />
-        <Stat label="Invisíveis Funcionais" value={texto ? analise.stats.invisiveisFuncionais : 0} icon="block" cor="#64b5f6" />
-        <Stat label="Caracteres Especiais" value={texto ? analise.stats.caracteresEspeciais : 0} icon="extension" cor="#aed581" />
-        <Stat label="Hífens Especiais" value={texto ? analise.stats.hifensEspeciais : 0} icon="remove" cor="#90a4ae" />
+        <div style={{
+          fontWeight: 700,
+          fontSize: 18,
+          width: "100%",
+          marginBottom: 12,
+          color: "#232323",
+          textAlign: "center"
+        }}>
+          <span className="material-icons" style={{
+            fontSize: 21, color: "#6c63ff", verticalAlign: "middle"
+          }}>insights</span>
+          {" "}Estatísticas do Texto
+        </div>
+        {/* Total de marcas */}
+        <div style={estatCardStyle}>
+          <span className="material-icons" style={iconStyle("#E57373")}>flag</span>
+          <div style={statNum}>{totalMarcas}</div>
+          <div style={statLabel}>Total de Marcas</div>
+        </div>
+        {/* Um card para cada tipo de marca */}
+        {tiposMarcas.map((t, i) => (
+          <div key={i} style={estatCardStyle}>
+            <span className="material-icons" style={iconStyle(t.cor)}>check_box</span>
+            <div style={statNum}>{estatisticas[t.nome]}</div>
+            <div style={statLabel}>{t.label}</div>
+          </div>
+        ))}
       </div>
 
-      {/* Botões */}
+      {/* Botão Limpar */}
       <div style={{
-        margin: "32px 0 18px 0",
-        textAlign: "center"
+        textAlign: "center",
+        marginBottom: 38
       }}>
         <button
-          onClick={handleLimpaTexto}
+          onClick={handleLimpar}
           disabled={!texto}
           style={{
-            padding: "14px 38px",
-            borderRadius: 10,
-            fontSize: 18,
-            background: COLORS.vermelho,
+            background: "#E31937",
             color: "#fff",
+            fontWeight: 700,
+            fontSize: 18,
             border: "none",
+            borderRadius: 8,
+            padding: "16px 36px",
             cursor: texto ? "pointer" : "not-allowed",
             opacity: texto ? 1 : 0.5,
-            fontFamily: "Poppins",
-            fontWeight: 700,
-            boxShadow: "0 2px 8px 0 rgba(227,25,55,0.09)",
-            letterSpacing: "1px"
+            minWidth: 240,
+            boxShadow: "0 2px 8px #0002",
+            transition: "all .15s"
           }}
         >
-          <span className="material-icons" style={{ fontSize: 22, verticalAlign: "middle", marginRight: 7 }}>cleaning_services</span>
-          Limpar Caracteres
+          <span className="material-icons" style={{
+            fontSize: 22,
+            verticalAlign: "middle",
+            marginRight: 6
+          }}>cleaning_services</span>
+          Limpar Texto e Copiar
         </button>
-      </div>
-      {/* Texto limpo e mensagem */}
-      {textoLimpo && (
-        <div
-          style={{
-            border: `1.5px solid ${COLORS.boxBorder}`,
-            borderRadius: 16,
-            boxShadow: COLORS.shadow,
-            padding: 18,
-            background: "#f7fbfa",
-            margin: "0 auto 8px auto",
-            maxWidth: 750
-          }}
-        >
-          <label style={{
-            fontFamily: "Poppins",
+        {copiado &&
+          <div style={{
+            marginTop: 10,
+            color: "#229954",
             fontWeight: 600,
-            color: COLORS.vermelho,
-            fontSize: 15,
-            marginBottom: 4
+            fontSize: 16
           }}>
-            Texto limpo (copiado!):
-          </label>
-          <textarea
-            readOnly
-            value={textoLimpo}
-            rows={Math.max(4, Math.min(10, textoLimpo.split("\n").length))}
-            style={{
-              width: "100%",
-              marginTop: 6,
-              padding: 12,
-              borderRadius: 8,
-              border: `1.5px solid ${COLORS.boxBorder}`,
-              fontSize: 15,
-              fontFamily: "Lato",
-              background: "#f7f4ed"
-            }}
-            onFocus={e => e.target.select()}
-          />
-          {avisocopiado && (
-            <div style={{ color: COLORS.vermelho, fontWeight: 700, fontFamily: "Montserrat", marginTop: 7 }}>
-              <span className="material-icons" style={{ fontSize: 20, verticalAlign: "middle", marginRight: 6 }}>check_circle</span>
-              Texto limpo copiado para a área de transferência!
-            </div>
-          )}
-        </div>
-      )}
-      {/* Rodapé */}
-      <footer
-        style={{
-          marginTop: 32,
-          textAlign: "center",
-          color: COLORS.cinza,
-          fontFamily: "Montserrat",
-          fontWeight: 400,
-          fontSize: 15,
-          paddingBottom: 26
-        }}
-      >
-        Limpa Rastros de IA &copy; {new Date().getFullYear()}
-      </footer>
+            Texto limpo copiado para a área de transferência!
+          </div>
+        }
+      </div>
     </div>
   );
 }
 
-// Componente para cada estatística
-function Stat({ label, value, icon, cor }) {
-  return (
-    <div style={{
-      background: "#f7f4ed",
-      borderRadius: 12,
-      minWidth: 110,
-      minHeight: 58,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-start",
-      padding: "7px 18px 7px 10px",
-      fontFamily: "Montserrat",
-      fontWeight: 600,
-      box
-```
+// Estilos para estatísticas
+const estatCardStyle = {
+  minWidth: 120,
+  flex: "1 0 120px",
+  background: "#fff",
+  borderRadius: 8,
+  padding: "14px 10px",
+  margin: "6px 4px",
+  textAlign: "center",
+  boxShadow: "0 1px 8px #0001",
+  border: "1px solid #eee",
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center"
+};
+
+const iconStyle = (cor) => ({
+  fontSize: 30,
+  color: cor,
+  marginBottom: 4
+});
+
+const statNum = {
+  fontSize: 25,
+  fontWeight: 800,
+  color: "#222"
+};
+
+const statLabel = {
+  fontSize: 15,
+  color: "#666"
+};
