@@ -1,22 +1,17 @@
 import React, { useState } from "react";
 import "./style.css";
 
-function destacarCaracteres(texto) {
-  // Cada caracter, se for especial, recebe <span className="char-destaque cor" style={{fontWeight:700}}>{c}</span>
-  return texto.split("").map((c, i) =>
-    mapa[c]
-      ? (
-        <span
-          key={i}
-          className={`char-destaque ${mapa[c]}`}
-          style={{ fontWeight: 700, padding: "2px 4px", borderRadius: "6px", background: "#fff", margin: "0 1px" }}
-          title={c.codePointAt(0).toString(16)}
-        >
-          {c}
-        </span>
-      )
-      : c
-  );
+function detectarCaracteres(texto) {
+  const chars = {
+    tracos: ["—", "–", "―"],
+    espacosEspeciais: [" ", " ", " ", " ", " ", "\u00A0"],
+    invisiveis: ["\u200B", "\u200C", "\u200D", "\u2060"],
+    aspas: ["“", "”", "‘", "’", "‹", "›", "«", "»"],
+    hifensEspeciais: ["‐", "‑", "‒", "−"],
+    controlesDirecionais: ["\u200E", "\u200F", "\u202A", "\u202B", "\u202C", "\u202D", "\u202E"],
+    invisiveisFuncionais: ["\u2061", "\u2062", "\u2063", "\u2064"],
+    especiais: ["⠀", "ㅤ"]
+  };
 
   const countChars = (text, charsArr) =>
     text.split("").filter(c => charsArr.includes(c)).length;
@@ -44,6 +39,7 @@ const mapa = {
   "⠀": "amarelo-claro", "ㅤ": "amarelo-claro"
 };
 
+// Função para remover caracteres indesejados
 function limparCaracteres(texto) {
   let resultado = texto;
   Object.keys(mapa).forEach(caractere => {
@@ -53,12 +49,52 @@ function limparCaracteres(texto) {
   return resultado;
 }
 
+// FUNÇÃO NOVA — DESTAQUE EXATAMENTE IGUAL AO PRINT
 function destacarCaracteres(texto) {
   return texto.split("").map((c, i) =>
     mapa[c]
-      ? <span key={i} className={`char-destaque ${mapa[c]}`} title={c.codePointAt(0).toString(16)}>{c}</span>
+      ? (
+        <span
+          key={i}
+          className={`char-destaque ${mapa[c]}`}
+          style={{
+            fontWeight: 700,
+            padding: "2px 6px",
+            margin: "0 1px",
+            borderRadius: "7px",
+            background: "#fff",
+            fontSize: "1.05em",
+            display: "inline-block"
+          }}
+          title={c.codePointAt(0).toString(16)}
+        >
+          {getNomeCurtoCaracter(c)}
+        </span>
+      )
       : c
   );
+}
+
+// Função auxiliar para mostrar sigla igual ao print (ex: EN SPACE, LRM etc.)
+function getNomeCurtoCaracter(c) {
+  switch (c) {
+    case " ": return "EM SPACE";
+    case " ": return "EN SPACE";
+    case " ": return "FIGURE SPACE";
+    case "\u00A0": return "NBSP";
+    case "\u200B": return "ZWSP";
+    case "\u200C": return "ZWNJ";
+    case "\u200D": return "ZWJ";
+    case "\u2060": return "WORD JOINER";
+    case "\u200E": return "LRM";
+    case "\u200F": return "RLM";
+    case "\u202A": return "LRE";
+    case "\u202B": return "RLE";
+    case "\u202C": return "PDF";
+    case "\u202D": return "LRO";
+    case "\u202E": return "RLO";
+    default: return c;
+  }
 }
 
 export default function App() {
