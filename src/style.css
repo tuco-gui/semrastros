@@ -343,3 +343,4 @@ header {
   .area-main { flex-direction: column; }
   .box-texto, .box-analise { min-width: 90vw; }
   .estatisticas-grid { gap: 12px 6px; }
+}
