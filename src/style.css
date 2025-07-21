@@ -1,0 +1,110 @@
+/* Fontes personalizadas */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@700;600&family=Lato:wght@400;300&family=Montserrat:wght@400&display=swap');
+
+/* Cores */
+:root {
+  --vermelho-figueira: #E31937;
+  --preto: #000000;
+  --branco: #FFFFFF;
+  --bege: #f7f4ed;
+  --cinza-escuro: #2C2C2C;
+}
+
+/* Reset básico */
+body {
+  margin: 0;
+  background: var(--bege);
+  font-family: 'Lato', Arial, Helvetica, sans-serif;
+  color: var(--preto);
+}
+
+.main-container {
+  max-width: 1100px;
+  margin: 32px auto;
+  padding: 24px;
+  background: var(--branco);
+  border-radius: 18px;
+  box-shadow: 0 6px 32px #0001;
+}
+
+/* Tipos de caracteres */
+.types-box {
+  margin-bottom: 22px;
+  padding: 18px 28px;
+  background: var(--branco);
+  border-radius: 12px;
+  box-shadow: 0 2px 16px #0000000d;
+}
+
+/* Caixa dupla */
+.double-box {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.caixa {
+  flex: 1;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px #0000000c;
+  padding: 18px 20px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  min-width: 360px;
+  max-width: 50%;
+}
+
+.caixa textarea,
+.caixa .analise-box {
+  width: 100%;
+  min-height: 220px;
+  max-height: 300px;
+  border-radius: 10px;
+  border: 1.5px solid #ececec;
+  padding: 18px;
+  font-size: 1.2rem;
+  background: #f7f4ed;
+  resize: none;
+  font-family: 'Lato', Arial, Helvetica, sans-serif;
+}
+
+.caixa textarea {
+  color: #222;
+  outline: none;
+  font-size: 1.18rem;
+  font-family: 'Lato', Arial, Helvetica, sans-serif;
+}
+
+.titulo-caixa {
+  font-family: 'Poppins', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 1.35rem;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.analise-box {
+  font-size: 1.15rem;
+  color: #888;
+  background: #f7f4ed;
+  border: 1.5px solid #ececec;
+  border-radius: 10px;
+  min-height: 220px;
+  max-height: 300px;
+  padding: 18px;
+}
+
+/* Responsivo */
+@media (max-width: 900px) {
+  .double-box {
+    flex-direction: column;
+    gap: 18px;
+  }
+  .caixa {
+    max-width: 100%;
+    min-width: 0;
+  }
+}
