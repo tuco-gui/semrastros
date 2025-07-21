@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import "./style.css";
 
 function detectarCaracteres(texto) {
-  // Define grupos de caracteres suspeitos
   // Grupos de caracteres suspeitos
   const chars = {
     tracos: ["—", "–", "―"],
@@ -31,17 +30,6 @@ function detectarCaracteres(texto) {
   };
 }
 
-function destacarCaracteres(texto) {
-  const mapa = {
-    "—": "vermelho", "–": "vermelho", "―": "vermelho",
-    " ": "azul", " ": "azul", " ": "azul", " ": "azul", " ": "azul", "\u00A0": "azul",
-    "\u200B": "amarelo", "\u200C": "amarelo", "\u200D": "amarelo", "\u2060": "amarelo",
-    "“": "roxo", "”": "roxo", "‘": "roxo", "’": "roxo", "‹": "roxo", "›": "roxo", "«": "roxo", "»": "roxo",
-    "‐": "rosa", "‑": "rosa", "‒": "rosa", "−": "rosa",
-    "\u200E": "verde", "\u200F": "verde", "\u202A": "verde", "\u202B": "verde", "\u202C": "verde", "\u202D": "verde", "\u202E": "verde",
-    "\u2061": "verde-claro", "\u2062": "verde-claro", "\u2063": "verde-claro", "\u2064": "verde-claro",
-    "⠀": "amarelo-claro", "ㅤ": "amarelo-claro"
-  };
 // Mapeamento das cores para span (NÃO ALTERAR pois já está linkado com seu CSS)
 const mapa = {
   "—": "vermelho", "–": "vermelho", "―": "vermelho",
@@ -74,12 +62,8 @@ function limparCaracteres(texto) {
 // Função para destacar caracteres
 function destacarCaracteres(texto) {
   return texto.split("").map((c, i) =>
-    mapa[c] ?
-      <span key={i} className={`char-destaque ${mapa[c]}`} title={c.codePointAt(0).toString(16)}>
-        {c}
-      </span>
     mapa[c]
-      ? <span key={i} className={`char-destaque ${mapa[c]}`} title={c.codePointAt(0).toString(16)}>{c}</span>
+      ? <span key={i} className={char-destaque ${mapa[c]}} title={c.codePointAt(0).toString(16)}>{c}</span>
       : c
   );
 }
@@ -95,8 +79,6 @@ export default function App() {
   // Limpa, copia e mostra mensagem
   function handleLimpar() {
     if (textoOriginal) {
-      navigator.clipboard.writeText(textoOriginal).then(() => {
-        setMensagem("Texto copiado!");
       const textoLimpo = limparCaracteres(textoOriginal);
       navigator.clipboard.writeText(textoLimpo).then(() => {
         setMensagem("Texto limpo copiado!");
@@ -104,7 +86,6 @@ export default function App() {
       });
       setTextoOriginal("");
     }
-    setTextoOriginal("");
   }
 
   return (
@@ -164,7 +145,6 @@ export default function App() {
             <span role="img" aria-label="Lupa">🔎</span>
             <span>Análise dos Caracteres</span>
           </div>
-          <div className="analise-area" style={{minHeight: 70, wordBreak: "break-all"}}>
           <div className="analise-area" style={{ minHeight: 70, wordBreak: "break-all" }}>
             {textoOriginal
               ? destacarCaracteres(textoOriginal)
@@ -189,8 +169,8 @@ export default function App() {
           <div className="estat-box"><div className="valor">{analise.hifensEspeciais}</div> Hífens Especiais</div>
         </div>
         <button className="btn-limpar" onClick={handleLimpar}>✨ Limpar Caracteres</button>
-        <div style={{marginTop:8, color:"green"}}>{mensagem}</div>
         <div style={{ marginTop: 8, color: "green" }}>{mensagem}</div>
       </section>
     </div>
   );
+}
